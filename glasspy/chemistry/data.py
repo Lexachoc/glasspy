@@ -1,4 +1,5 @@
 # data from https://github.com/lmmentel/mendeleev/
+# see also https://pubchem.ncbi.nlm.nih.gov/periodic-table/
 
 # in paper, it says "Only the elements between atomic numbers 1 and 83 (hydrogen and bismuth included) were considered"
 # but why are more elements included here?
