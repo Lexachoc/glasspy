@@ -204,67 +204,33 @@ def to_element_array(
     return ChemArray(x_element, output_element_cols)
 
 
+# custom
 def wt_to_mol(
-    x: Union[np.ndarray, ChemArray],
-    input_cols: List[str],
-    rescale_to_sum: Union[float, int, bool] = False,
-) -> Union[np.ndarray, ChemArray]:
-    """Convert an array from weight% to mol%.
-
-    Args:
-      x:
-        A 2D array. Each row is a chemical substance. See the docstring of the
-        function to_array for more information.
-      input_cols:
-        List of strings representing the chemical entities related to each
-        column of x.
-      rescale_to_sum:
-        A positive number representing the total sum of each chemical substance.
-        If False then the same input array is returned.
-
-    Returns:
-      A 2D array. Each row is a chemical substance.
-    """
-
-    inv_molar_mass = np.diag(
-        [
-            1 / sum([elementmass[el] * n for el, n in parse_formula(comp).items()])
-            for comp in input_cols
-        ]
-    )
-    x = x @ inv_molar_mass
-    x = rescale_array(x, rescale_to_sum)
-    return x
+        x: List[List[float]],
+        input_cols: List[str]
+) -> np.ndarray:
+    molar_masses = np.array([
+        sum([elementmass[el] * n for el, n in parse_formula(comp).items()])
+        for comp in input_cols
+    ])
+    wt_matrix = np.array(x)
+    moles_matrix = wt_matrix / molar_masses
+    total_moles = moles_matrix.sum(axis=1, keepdims=True)
+    mol_pt_matrix = (moles_matrix / total_moles)
+    return mol_pt_matrix
 
 
+# custom
 def mol_to_wt(
-    x: Union[np.ndarray, ChemArray],
-    input_cols: List[str],
-    rescale_to_sum: Union[float, int, bool] = False,
-) -> Union[np.ndarray, ChemArray]:
-    """Convert an array from mol% to weight%.
-
-    Args:
-      x:
-        A 2D array. Each row is a chemical substance. See the docstring of the
-        function to_array for more information.
-      input_cols:
-        List of strings representing the chemical entities related to each
-        column of x.
-      rescale_to_sum:
-        A positive number representing the total sum of each chemical substance.
-        If False then the same input array is returned.
-
-    Returns:
-      A 2D array. Each row is a chemical substance.
-    """
-
-    molar_mass = np.diag(
-        [
-            sum([elementmass[el] * n for el, n in parse_formula(comp).items()])
-            for comp in input_cols
-        ]
-    )
-    x = x @ molar_mass
-    x = rescale_array(x, rescale_to_sum)
-    return x
+        x: List[List[float]],
+        input_cols: List[str]
+) -> np.ndarray:
+    molar_masses = np.array([
+        sum([elementmass[el] * n for el, n in parse_formula(comp).items()])
+        for comp in input_cols
+    ])
+    mol_matrix = np.array(x)
+    masses_matrix = mol_matrix * molar_masses
+    total_mass = masses_matrix.sum(axis=1, keepdims=True)
+    wt_pc_matrix = (masses_matrix / total_mass)
+    return wt_pc_matrix
